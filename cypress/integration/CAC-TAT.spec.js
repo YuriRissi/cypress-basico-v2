@@ -117,4 +117,35 @@ describe("Central de Atendimento ao Cliente TAT", () => {
       .uncheck()
       .should("not.be.checked");
   });
+  it("seleciona um arquivo da pasta fixtures", () => {
+    cy.get("#file-upload")
+      .should("not.have.value")
+      .selectFile("./cypress/fixtures/example.json")
+      .then((input) => {
+        expect(input[0].files[0].name).to.equal("example.json");
+      });
+  });
+  it("seleciona um arquivo simulando um drag-and-drop", () => {
+    cy.get("#file-upload")
+      .should("not.have.value")
+      .selectFile("./cypress/fixtures/example.json", { action: "drag-drop" })
+      .then((input) => {
+        expect(input[0].files[0].name).to.equal("example.json");
+      });
+  });
+  it("seleciona um arquivo utilizando uma fixture para a qual foi dada um alias", () => {
+    cy.fixture("example.json").as("example");
+    cy.get("#file-upload")
+      .selectFile("@example")
+      .then((input) => {
+        expect(input[0].files[0].name).to.equal("example.json");
+      });
+  });
+  it("verifica que a política de privacidade abre em outra aba sem a necessidade de um clique", () => {
+    cy.get('a[href="privacy.html"]').should("have.attr", "target", "_blank");
+  });
+  it("acessa a página da política de privacidade removendo o target e então clicanco no link", () => {
+    cy.get('a[href="privacy.html"]').invoke("removeAttr", "target").click();
+    cy.contains("Não salvamos dados").should("be.visible");
+  });
 });
