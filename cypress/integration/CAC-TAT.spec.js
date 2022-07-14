@@ -11,6 +11,8 @@ describe("Central de Atendimento ao Cliente TAT", () => {
   it("preenche os campos obrigatórios e envia o formulário", () => {
     const longText =
       "Teste com Cypress Teste com Cypress Teste com Cypress Teste com Cypress Teste com Cypress Teste com Cypress Teste com Cypress Teste com Cypress Teste com Cypress Teste com Cypress Teste com Cypress Teste com Cypress Teste com Cypress Teste com Cypress";
+    cy.clock();
+
     cy.get("#firstName")
       .should("be.visible")
       .type("Yuri")
@@ -30,8 +32,13 @@ describe("Central de Atendimento ao Cliente TAT", () => {
     cy.get("form").find("button", "Enviar").click();
 
     cy.get('span[class="success"]').should("be.visible");
+
+    cy.tick(3000);
+    cy.get('span[class="success"]').should("not.be.visible");
   });
   it("exibe mensagem de erro ao submeter o formulário com um email com formatação inválida", () => {
+    cy.clock();
+
     cy.get("#firstName").type("Yuri");
     cy.get("#lastName").type("Rissi");
     cy.get("#email").type("yuriexamplecom");
@@ -39,6 +46,9 @@ describe("Central de Atendimento ao Cliente TAT", () => {
     cy.get("form").find("button", "Enviar").click();
 
     cy.get('span[class="error"]').should("be.visible");
+
+    cy.tick(3000);
+    cy.get('span[class="error"]').should("not.be.visible");
   });
   it("campo de telefone continua vazio quando preenchido com valor não-númerico", () => {
     cy.get("#firstName").type("Yuri");
@@ -50,6 +60,8 @@ describe("Central de Atendimento ao Cliente TAT", () => {
     cy.get("#phone").type("teste").should("to.be.empty");
   });
   it("exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário", () => {
+    cy.clock();
+
     cy.get("#firstName").type("Yuri");
     cy.get("#lastName").type("Rissi");
     cy.get("#email").type("yuri@example.com");
@@ -58,6 +70,9 @@ describe("Central de Atendimento ao Cliente TAT", () => {
     cy.get("form").find("button", "Enviar").click();
 
     cy.get('span[class="error"]').should("be.visible");
+
+    cy.tick(3000);
+    cy.get('span[class="error"]').should("be.not.visible");
   });
   it("preenche e limpa os campos nome, sobrenome, email e telefone", () => {
     cy.get("#firstName")
@@ -82,11 +97,21 @@ describe("Central de Atendimento ao Cliente TAT", () => {
       .should("to.be.empty");
   });
   it("exibe mensagem de erro ao submeter o formulário sem preencher os campos obrigatórios", () => {
+    cy.clock();
+
     cy.get("form").find("button", "Enviar").click();
     cy.get('span[class="error"]').should("be.visible");
+
+    cy.tick(3000);
+    cy.get('span[class="error"]').should("not.be.visible");
   });
   it("envia o formuário com sucesso usando um comando customizado", () => {
+    cy.clock();
+
     cy.fillMandatoryFieldsAndSubmit();
+
+    cy.tick(3000);
+    cy.get(".success").should("not.be.visible");
   });
   it("seleciona um produto (YouTube) por seu texto", () => {
     cy.get("#product").select("YouTube").should("have.value", "youtube");
@@ -147,5 +172,29 @@ describe("Central de Atendimento ao Cliente TAT", () => {
   it("acessa a página da política de privacidade removendo o target e então clicanco no link", () => {
     cy.get('a[href="privacy.html"]').invoke("removeAttr", "target").click();
     cy.contains("Não salvamos dados").should("be.visible");
+  });
+
+  it("exibe e esconde as mensagens de sucesso e erro usando o .invoke()", () => {
+    cy.get(".success")
+      .should("not.be.visible")
+      .invoke("show")
+      .should("be.visible")
+      .and("contain", "Mensagem enviada com sucesso.")
+      .invoke("hide")
+      .should("not.be.visible");
+    cy.get(".error")
+      .should("not.be.visible")
+      .invoke("show")
+      .should("be.visible")
+      .and("contain", "Valide os campos obrigatórios!")
+      .invoke("hide")
+      .should("not.be.visible");
+  });
+  it("preenche a area de texto usando o comando invoke", () => {
+    const stringToTest = Cypress._.repeat("teste", 30);
+
+    cy.get("#open-text-area")
+      .invoke("val", stringToTest)
+      .should("have.value", stringToTest);
   });
 });
